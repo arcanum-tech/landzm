@@ -1,65 +1,140 @@
-import Image from "next/image";
+import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
-export default function Home() {
+const AREAS = ["All Areas", "Lusaka", "Chilanga", "Kafue", "Chongwe", "Kabwe", "Ndola", "Kitwe", "Livingstone"];
+const TYPES = ["All Types", "Residential", "Commercial", "Agricultural", "Industrial"];
+
+export const dynamic = "force-dynamic";
+
+export default async function Home({ searchParams }: { searchParams: Promise<{ area?: string; type?: string; max?: string }> }) {
+  const sp = await searchParams;
+  const area = sp.area || "";
+  const type = sp.type || "";
+  const max = sp.max ? parseFloat(sp.max) : null;
+
+  let query = supabase
+    .from("land_listings")
+    .select("*, land_sellers(name, is_verified)")
+    .eq("is_active", true)
+    .order("is_featured", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  if (area && area !== "All Areas") query = query.eq("area", area);
+  if (type && type !== "All Types") query = query.ilike("land_type", type);
+  if (max) query = query.lte("price_zmw", max);
+
+  const { data: listings } = await query;
+
+  const deedColor = (status: string) => {
+    if (status === "verified") return { bg: "#d1fae5", text: "#065f46", label: "✓ Title Deed Verified" };
+    if (status === "pending") return { bg: "#fef3c7", text: "#92400e", label: "⏳ Deed Pending Verification" };
+    return { bg: "#fee2e2", text: "#991b1b", label: "⚠ No Title Deed" };
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen" style={{ background: "#fffbeb", fontFamily: "system-ui, sans-serif" }}>
+      <header style={{ background: "linear-gradient(135deg,#b45309,#92400e)" }} className="text-white px-6 py-4 shadow-lg">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style={{ background: "rgba(255,255,255,0.2)" }}>🏡</div>
+            <div>
+              <h1 className="text-xl font-black tracking-tight leading-none">LandZM</h1>
+              <p className="text-xs" style={{ color: "rgba(255,255,255,0.7)" }}>Verified Land & Property 🇿🇲</p>
+            </div>
+          </div>
+          <Link href="/seller/login" className="text-xs font-bold px-4 py-2 rounded-full" style={{ background: "rgba(255,255,255,0.2)" }}>
+            List Your Land →
+          </Link>
+        </div>
+      </header>
+
+      <section style={{ background: "linear-gradient(135deg,#b45309,#92400e)" }} className="text-white px-6 pt-10 pb-16">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4" style={{ background: "rgba(255,255,255,0.15)" }}>
+            🛡 Fighting land fraud in Zambia
+          </div>
+          <h2 className="text-4xl font-black mb-3 leading-tight">
+            Find land you can<br />
+            <span style={{ color: "#fde68a" }}>actually trust.</span>
+          </h2>
+          <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.8)" }}>
+            Every listing shows title deed status. Know what you&apos;re buying before you pay.
           </p>
+          <div className="flex flex-wrap justify-center gap-3 text-xs">
+            {["Title Deed Status Shown", "Direct Seller Contact", "Free to List", "All Districts"].map((t) => (
+              <span key={t} className="px-3 py-1 rounded-full font-semibold" style={{ background: "rgba(255,255,255,0.2)" }}>{t}</span>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-6 -mt-6">
+        <form className="bg-white rounded-2xl shadow-lg p-4 flex flex-wrap gap-3 border border-amber-100">
+          <select name="area" defaultValue={area}
+            className="flex-1 min-w-[140px] border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-400 bg-gray-50">
+            {AREAS.map((a) => <option key={a}>{a}</option>)}
+          </select>
+          <select name="type" defaultValue={type}
+            className="flex-1 min-w-[140px] border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-400 bg-gray-50">
+            {TYPES.map((t) => <option key={t}>{t}</option>)}
+          </select>
+          <input name="max" type="number" placeholder="Max price (ZMW)" defaultValue={max ?? ""}
+            className="flex-1 min-w-[160px] border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-400 bg-gray-50" />
+          <button type="submit" className="text-white font-black px-5 py-2.5 rounded-xl text-sm"
+            style={{ background: "linear-gradient(135deg,#b45309,#92400e)" }}>
+            Search
+          </button>
+        </form>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-6 py-8">
+        <p className="text-sm text-gray-500 mb-5">{listings?.length ?? 0} listings found</p>
+        {!listings?.length ? (
+          <div className="text-center py-16 text-gray-400">
+            <p className="text-4xl mb-3">🏜</p>
+            <p className="font-semibold">No listings yet.</p>
+            <Link href="/seller/login" className="text-sm font-bold mt-2 inline-block" style={{ color: "#b45309" }}>Be the first to list →</Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {listings.map((l: any) => {
+              const deed = deedColor(l.title_deed_status);
+              return (
+                <Link key={l.id} href={`/listing/${l.id}`}
+                  className="bg-white rounded-2xl border border-amber-100 shadow-sm hover:shadow-lg transition-all overflow-hidden group">
+                  {l.is_featured && (
+                    <div className="text-xs font-black text-white text-center py-1" style={{ background: "linear-gradient(135deg,#b45309,#92400e)" }}>
+                      ⭐ FEATURED
+                    </div>
+                  )}
+                  <div className="p-5">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <h3 className="font-black text-gray-900 text-sm leading-snug group-hover:text-amber-700 transition-colors">{l.title}</h3>
+                      <span className="text-xs px-2 py-0.5 rounded-full font-semibold capitalize shrink-0"
+                        style={{ background: "#fef3c7", color: "#92400e" }}>{l.land_type}</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mb-3">📍 {l.area}, {l.district}{l.size_acres ? ` · ${l.size_acres} acres` : ""}</p>
+                    <span className="text-xs font-bold px-2.5 py-1 rounded-full block w-fit mb-3"
+                      style={{ background: deed.bg, color: deed.text }}>{deed.label}</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-black" style={{ color: "#b45309" }}>ZMW {Number(l.price_zmw).toLocaleString()}</span>
+                      {l.land_sellers?.is_verified && (
+                        <span className="text-xs bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-full">✓ Verified Seller</span>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      <footer className="text-center py-8 text-xs" style={{ background: "#111827", color: "#9ca3af" }}>
+        <p className="text-white font-black text-base mb-1">LandZM 🏡</p>
+        <p className="mb-1">Powered by <span style={{ color: "#fde68a" }}>ARCANUM TECH LIMITED</span> · TPIN: 2003723894 · Lusaka, Zambia</p>
+        <p style={{ color: "#6b7280" }}>Always verify title deeds independently before making payment.</p>
+      </footer>
     </div>
   );
 }
