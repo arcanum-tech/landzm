@@ -80,6 +80,34 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
         {/* Enquiry form */}
         <EnquiryForm listingId={l.id} />
 
+        {/* Conveyancing service */}
+        <div className="bg-white rounded-2xl p-5 border border-amber-100 shadow-sm">
+          <p className="font-black text-gray-800 mb-1">⚖️ Need help with the transfer?</p>
+          <p className="text-xs text-gray-500 mb-4">
+            Our legal partner <strong>Elija Simbai Consultation</strong> can handle the full conveyancing process —
+            title search, transfer documents, and registration at the Lands & Deeds Registry.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            {[
+              { label: "Title Search & Caveat Check", price: "ZMW 150" },
+              { label: "Draft Transfer Documents", price: "ZMW 800" },
+              { label: "Full End-to-End Conveyancing", price: "ZMW 2,000+" },
+            ].map((s) => (
+              <div key={s.label} className="rounded-xl p-3 text-center" style={{ background: "#fef3c7" }}>
+                <p className="text-xs font-bold text-gray-700">{s.label}</p>
+                <p className="text-sm font-black mt-1" style={{ color: "#b45309" }}>{s.price}</p>
+              </div>
+            ))}
+          </div>
+          <a href="https://wa.me/260976000000?text=Hello%2C+I+need+conveyancing+help+for+a+land+purchase+on+LandZM"
+            target="_blank"
+            className="block text-center text-white font-black py-3 rounded-xl text-sm"
+            style={{ background: "linear-gradient(135deg,#b45309,#92400e)" }}>
+            💬 Contact Elija Simbai Consultation →
+          </a>
+          <p className="text-xs text-gray-400 text-center mt-2">Facilitated by ARCANUM TECH LIMITED</p>
+        </div>
+
         <div className="bg-white rounded-2xl p-4 border border-amber-100 text-xs text-gray-500">
           <p className="font-black text-gray-700 mb-1">🛡 Buyer Safety Tips</p>
           <ul className="space-y-1">
