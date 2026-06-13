@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import HeaderAuth from "./HeaderAuth";
 
 const AREAS = ["All Areas", "Lusaka", "Chilanga", "Kafue", "Chongwe", "Kabwe", "Ndola", "Kitwe", "Livingstone"];
 const TYPES = ["All Types", "Residential", "Commercial", "Agricultural", "Industrial"];
@@ -42,9 +43,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
               <p className="text-xs" style={{ color: "rgba(255,255,255,0.7)" }}>Verified Land & Property 🇿🇲</p>
             </div>
           </div>
-          <Link href="/seller/login" className="text-xs font-bold px-4 py-2 rounded-full" style={{ background: "rgba(255,255,255,0.2)" }}>
-            List Your Land →
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/list" className="text-xs font-bold px-4 py-2 rounded-full" style={{ background: "rgba(255,255,255,0.2)" }}>
+              List Your Land →
+            </Link>
+            <HeaderAuth />
+          </div>
         </div>
       </header>
 
@@ -60,10 +64,20 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
           <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.8)" }}>
             Every listing shows title deed status. Know what you&apos;re buying before you pay.
           </p>
-          <div className="flex flex-wrap justify-center gap-3 text-xs">
+          <div className="flex flex-wrap justify-center gap-3 text-xs mb-6">
             {["Title Deed Status Shown", "Direct Seller Contact", "Free to List", "All Districts"].map((t) => (
               <span key={t} className="px-3 py-1 rounded-full font-semibold" style={{ background: "rgba(255,255,255,0.2)" }}>{t}</span>
             ))}
+          </div>
+          <div className="flex flex-wrap justify-center gap-3">
+            <a href="#listings" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-black text-sm text-white"
+              style={{ background: "rgba(255,255,255,0.25)", border: "2px solid rgba(255,255,255,0.4)" }}>
+              Browse Listings ↓
+            </a>
+            <Link href="/list" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-black text-sm"
+              style={{ background: "#fde68a", color: "#92400e" }}>
+              List Your Land →
+            </Link>
           </div>
         </div>
       </section>
@@ -87,7 +101,49 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ a
         </form>
       </section>
 
-      <section className="max-w-6xl mx-auto px-6 py-8">
+      {/* Services Section */}
+      <section className="max-w-6xl mx-auto px-6 py-10">
+        <div className="text-center mb-6">
+          <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: "#b45309" }}>Professional Services</p>
+          <h3 className="text-2xl font-black text-gray-900">We can help you further</h3>
+          <p className="text-sm text-gray-500 mt-1">Facilitated by ARCANUM TECH LIMITED · executed by licensed Zambian lawyers</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <Link href="/services/title-verification"
+            className="bg-white rounded-2xl p-6 border border-amber-100 shadow-sm hover:shadow-lg transition-all group">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl mb-4"
+              style={{ background: "#fef3c7" }}>🔍</div>
+            <h4 className="font-black text-gray-900 text-lg mb-2 group-hover:text-amber-700 transition-colors">Title Deed Verification</h4>
+            <p className="text-sm text-gray-600 leading-relaxed mb-4">
+              Before you buy, we verify the title deed is genuine at the Ministry of Lands. Check for fraud, encumbrances, and real ownership.
+            </p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {["Ministry of Lands check", "Fraud detection", "48-hr report"].map(t => (
+                <span key={t} className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background: "#fef3c7", color: "#92400e" }}>{t}</span>
+              ))}
+            </div>
+            <span className="text-sm font-black" style={{ color: "#b45309" }}>Request Verification →</span>
+          </Link>
+
+          <Link href="/services/conveyancing"
+            className="bg-white rounded-2xl p-6 border border-amber-100 shadow-sm hover:shadow-lg transition-all group">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl mb-4"
+              style={{ background: "#fef3c7" }}>⚖️</div>
+            <h4 className="font-black text-gray-900 text-lg mb-2 group-hover:text-amber-700 transition-colors">Conveyancing</h4>
+            <p className="text-sm text-gray-600 leading-relaxed mb-4">
+              Full property transfer handled end-to-end. Sale agreements, title transfer at Ministry of Lands, stamp duty, and final title in your name.
+            </p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {["Sale agreement", "Title transfer", "Stamp duty"].map(t => (
+                <span key={t} className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background: "#fef3c7", color: "#92400e" }}>{t}</span>
+              ))}
+            </div>
+            <span className="text-sm font-black" style={{ color: "#b45309" }}>Request Conveyancing →</span>
+          </Link>
+        </div>
+      </section>
+
+      <section id="listings" className="max-w-6xl mx-auto px-6 py-8">
         <p className="text-sm text-gray-500 mb-5">{listings?.length ?? 0} listings found</p>
         {!listings?.length ? (
           <div className="text-center py-16 text-gray-400">
