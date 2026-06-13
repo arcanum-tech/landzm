@@ -1,12 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function EnquiryForm({ listingId }: { listingId: string }) {
+  const CACHE_KEY = `landzm_enquiry_${listingId}`;
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<"idle" | "sent" | "error">("idle");
+
+  useEffect(() => {
+    try { const s = sessionStorage.getItem(CACHE_KEY); if (s) { const d = JSON.parse(s); if (d.name) setName(d.name); if (d.phone) setPhone(d.phone); if (d.message) setMessage(d.message); } } catch {}
+  }, [CACHE_KEY]);
+  useEffect(() => {
+    try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ name, phone, message })); } catch {}
+  }, [name, phone, message, CACHE_KEY]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -15,6 +23,7 @@ export default function EnquiryForm({ listingId }: { listingId: string }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ listing_id: listingId, enquirer_name: name, enquirer_phone: phone, message }),
     });
+    if (res.ok) { try { sessionStorage.removeItem(CACHE_KEY); } catch {} }
     setStatus(res.ok ? "sent" : "error");
   }
 

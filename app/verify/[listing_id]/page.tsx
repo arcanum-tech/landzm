@@ -1,15 +1,23 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, use, useEffect } from "react";
 import Link from "next/link";
 
 export default function RequestVerificationPage({ params }: { params: Promise<{ listing_id: string }> }) {
   const { listing_id } = use(params);
+  const CACHE_KEY = `landzm_verify_${listing_id}`;
   const [sellerId, setSellerId] = useState("");
   const [deedNumber, setDeedNumber] = useState("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    try { const s = sessionStorage.getItem(CACHE_KEY); if (s) { const d = JSON.parse(s); if (d.sellerId) setSellerId(d.sellerId); if (d.deedNumber) setDeedNumber(d.deedNumber); if (d.notes) setNotes(d.notes); } } catch {}
+  }, [CACHE_KEY]);
+  useEffect(() => {
+    try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ sellerId, deedNumber, notes })); } catch {}
+  }, [sellerId, deedNumber, notes, CACHE_KEY]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -29,6 +37,7 @@ export default function RequestVerificationPage({ params }: { params: Promise<{ 
     const callbackUrl = encodeURIComponent(
       `https://landzm.vercel.app/api/verify-callback?request_id=${data.id}&seller_id=${sellerId}&status=success`
     );
+    try { sessionStorage.removeItem(CACHE_KEY); } catch {}
     window.location.href = `https://arcanum-payments.vercel.app/pay?app=landzm&product=LandZM+Deed+Verification&amount=50&callback=${callbackUrl}`;
   }
 

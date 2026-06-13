@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -18,6 +18,7 @@ function ListForm() {
   const sellerId = searchParams.get("seller_id") ?? "";
   const router = useRouter();
 
+  const CACHE_KEY = `landzm_list_${sellerId || "guest"}`;
   const [form, setForm] = useState({
     seller_id: sellerId,
     title: "", area: "Lusaka", district: "Lusaka", size_acres: "",
@@ -26,6 +27,13 @@ function ListForm() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    try { const s = sessionStorage.getItem(CACHE_KEY); if (s) { const d = JSON.parse(s); if (d) setForm(prev => ({ ...prev, ...d, seller_id: sellerId })); } } catch {}
+  }, [CACHE_KEY, sellerId]);
+  useEffect(() => {
+    try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(form)); } catch {}
+  }, [form, CACHE_KEY]);
 
   function set(k: string, v: string) { setForm((p) => ({ ...p, [k]: v })); }
 
@@ -40,6 +48,7 @@ function ListForm() {
     const data = await res.json();
     setLoading(false);
     if (!res.ok) { setError(data.error); return; }
+    try { sessionStorage.removeItem(CACHE_KEY); } catch {}
     router.push(sellerId ? `/seller/${sellerId}` : `/listing/${data.id}`);
   }
 
